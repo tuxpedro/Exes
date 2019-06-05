@@ -72,11 +72,11 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
         var lastrows = contentTbody.lastElementChild.querySelectorAll('th, td');
         var contentRow = {};
         for (i = 0; i < 6; i++) {
-            console.log(contentRow[tablehead.cells.item(i).textContent] = lastrows.item(i).textContent);
-        }
-
+            contentRow[tablehead.cells.item(i).textContent] = lastrows.item(i).textContent;
+        };
         jsonExes['exes'].push(contentRow);
         console.log(jsonExes);
+        //return jsonExes;
     }
 };
 
@@ -103,5 +103,10 @@ function deleteDespesa(x) {
     saldo.updateSaldo();
     console.log(row + ' deletada');
 };
+
+function showJson(){
+    //strJsonExes = JSON.parse(jsonExes);
+    console.log(JSON.parse(jsonExes));
+}
 
 
