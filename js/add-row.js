@@ -11,11 +11,7 @@ var item = 0;
 
 // get velues table
 var contentTbody = document.querySelector('tbody');
-
-function saveExes(){
-    var values = contentTbody.children;
-    console.log(values);
-}
+var jsonExes = {'exes':[]};
 
 //Objeto Saldo
 function Saldo(value) {
@@ -66,6 +62,22 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
         var newRow = document.importNode(template.content, true);
         contentTbody.appendChild(newRow);
     };
+
+    function saveExes() {
+
+    }
+
+    this.gerarJson = function () {
+        var tablehead = contentTbody.parentElement.querySelector('tr');
+        var lastrows = contentTbody.lastElementChild.querySelectorAll('th, td');
+        var contentRow = {};
+        for (i = 0; i < 6; i++) {
+            console.log(contentRow[tablehead.cells.item(i).textContent] = lastrows.item(i).textContent);
+        }
+
+        jsonExes['exes'].push(contentRow);
+        console.log(jsonExes);
+    }
 };
 
 addButton.addEventListener('click', function () {
@@ -75,13 +87,14 @@ addButton.addEventListener('click', function () {
         newExes.addRowByTemplate();
         saldo.updateSaldo();
         clearInputs();
+        newExes.gerarJson();
         document.querySelector('.alert').hidden = true
     } else {
         document.querySelector('.alert').hidden = false
     };
 });
 
-function deleteDespesa(x){
+function deleteDespesa(x) {
     var row = x.parentNode.parentNode.rowIndex;
     var rowSaldo = x.parentNode.parentElement.querySelectorAll('td')[3].textContent;
     document.querySelector('table').deleteRow(row);
