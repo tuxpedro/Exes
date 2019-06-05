@@ -105,8 +105,8 @@ function deleteDespesa(x) {
 };
 
 function showJson(){
-    //strJsonExes = JSON.parse(jsonExes);
-    console.log(JSON.parse(jsonExes));
+    strJsonExes = JSON.parse(jsonExes);
+    console.log(strJsonExes);
 }
 
 
