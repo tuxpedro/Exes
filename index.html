@@ -11,11 +11,16 @@
         integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
 
     <link rel="stylesheet" href="css/styles.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
     <title>MyApp</title>
 </head>
 
 <body>
     <div class="container">
+
+        <!-- chart -->
+        <canvas id="myChart" width="200" height="60"></canvas>
 
         <h1 class="display-4">Exes</h1>
         <p class="lead">This app show expenses on month</p>
@@ -33,18 +38,12 @@
             </div>
             <div class="form-row">
                 <div class="col">
-                    <select class="form-control" id="despesa">
-                        <option value="" selected disabled hidden>Tipo despesa</option>
-                        <option>Aluguel</option>
-                        <option>Condomínio</option>
-                        <option>Padaria</option>
-                        <option>Roupa</option>
-                        <option>Supermercado</option>
-                        <option>Corrida</option>
-                        <option>Academia</option>
-                        <option>Cartão de Credito</option>
-                        <option>Cartão de debito</option>
-                    </select>
+                    <input list="despesa" value="" class="custom-select" placeholder="Digite ou Selecione">
+                    <datalist id="despesa">
+                        <option value="debito">Cartão Debito</option>
+                        <option value="credito">Cartão de Credito</option>
+                        <option value="domestica">Despesa Domestica</option>
+                    </datalist>
                 </div>
 
                 <div class="col">
@@ -65,7 +64,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
+                    <th scope="col">Item</th>
                     <th scope="col">Despesa</th>
                     <th scope="col">Estabelecimento</th>
                     <th scope="col">Data</th>
@@ -83,10 +82,9 @@
             <button class="btn btn-primary">Gerar Estatisticas </button>
             <button id="showJson" onclick="showJson();" class="btn btn-primary">Exibir Json</button>
         </div>
-        <div id="show-json">
-            <pre><code>
-
-            </code></pre>
+        <br />
+        <div id="show-json" hidden="true">
+            <pre></pre>
         </div>
 
         <template id="template1">
@@ -108,7 +106,8 @@
                     <!-- Saldo -->
                 </td>
                 <td>
-                    <button type="button"  id="btn-del" class="btn btn-danger" onclick="deleteDespesa(this)"><i class="far fa-times-circle"></i></button>
+                    <button type="button" id="btn-del" class="btn btn-danger" onclick="deleteDespesa(this)"><i
+                            class="far fa-times-circle"></i></button>
                 </td>
             </tr>
         </template>

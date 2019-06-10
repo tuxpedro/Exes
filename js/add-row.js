@@ -11,7 +11,7 @@ var item = 0;
 
 // get velues table
 var contentTbody = document.querySelector('tbody');
-var jsonExes = {'exes':[]};
+var jsonExes = { 'exes': [] };
 
 //Objeto Saldo
 function Saldo(value) {
@@ -72,11 +72,10 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
         var lastrows = contentTbody.lastElementChild.querySelectorAll('th, td');
         var contentRow = {};
         for (i = 0; i < 6; i++) {
-            contentRow[tablehead.cells.item(i).textContent] = lastrows.item(i).textContent;
+            contentRow[tablehead.cells.item(i).textContent.toLocaleLowerCase()] = lastrows.item(i).textContent;
         };
         jsonExes['exes'].push(contentRow);
-        console.log(jsonExes);
-        //return jsonExes;
+        // console.log(jsonExes);
     }
 };
 
@@ -96,17 +95,56 @@ addButton.addEventListener('click', function () {
 
 function deleteDespesa(x) {
     var row = x.parentNode.parentNode.rowIndex;
-    var rowSaldo = x.parentNode.parentElement.querySelectorAll('td')[3].textContent;
+    var rowSaldo = x.parentNode.parentNode.cells.item(4).textContent;
+    var rowItem = x.parentNode.parentNode.cells.item(0).textContent
     document.querySelector('table').deleteRow(row);
     var saldo = new Saldo(parseFloat(iptSaldo.value));
     saldo.credito(parseFloat(rowSaldo));
     saldo.updateSaldo();
-    console.log(row + ' deletada');
+
+    for (i = 0; i < jsonExes["exes"].length; i++) {
+        if (jsonExes["exes"][i].item == rowItem) {
+            var exesItem = jsonExes["exes"][i];
+            index = jsonExes["exes"].indexOf(exesItem);
+            itemDel = jsonExes["exes"].splice(index, 1);
+            console.log(itemDel);
+        }
+    }
+
+    if (document.getElementById('show-json').hidden = false) { showJson(); }
 };
 
-function showJson(){
-    strJsonExes = JSON.parse(jsonExes);
-    console.log(strJsonExes);
+function showJson() {
+    strJsonExes = JSON.stringify(jsonExes);
+    document.querySelector('pre').innerHTML = strJsonExes;
+    document.getElementById('show-json').hidden = false;
 }
 
+
+var ctx = document.getElementById('myChart').getContext('2d');
+var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'pie',
+
+    // The data for our dataset
+    data: {
+        labels: ['Aluguel', 'Condominio', 'Padaria', 'Supermercado', 'Card. Credito', 'Card. Debito', 'Corridas'],
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: 'rgb(0, 0, 0, 0)',
+            data: [90, 10, 5, 2, 20, 30, 45]
+        }]
+    },
+
+    // Configuration options go here
+    options: {}
+});
 
