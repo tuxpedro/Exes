@@ -13,6 +13,14 @@ var item = 0;
 var contentTbody = document.querySelector('tbody');
 var jsonExes = { 'exes': [] };
 
+// List type exes
+var exesItem = { "Debito": "Cartão de Debito", "Credito": "Cartão de Credito", "Domesticas": "Despesas da Casa" };
+
+//Datalist exes
+var listExes = document.getElementById('optDespesas');
+
+
+
 //Objeto Saldo
 function Saldo(value) {
     this.saldo = value
@@ -30,24 +38,27 @@ function Saldo(value) {
     };
 };
 
+// Convert a date
 function convertDate(data) {
     var arrDate = data.split('-');
     var stringDate = arrDate[2] + '/' + arrDate[1] + '/' + arrDate[0];
     return stringDate;
 };
 
+//Clear inputs forms
 function clearInputs() {
     inputs = document.querySelectorAll('input, select');
     for (i = 1; i < inputs.length; i++) { inputs[i].value = null; }
 }
 
-//Objeto despesa
+//Object Exes
 function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
     this.tipoDespesa = despesa;
     this.estabCompra = estabelecimento;
     this.dataDespesa = data;
     this.valorDespesa = valor;
 
+    //Add rows in table of expenses
     this.addRowByTemplate = function () {
         var template = document.querySelector("#template1");
         list_td = template.content.querySelectorAll('th, td');
@@ -63,10 +74,35 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
         contentTbody.appendChild(newRow);
     };
 
-    function saveExes() {
+    //loads the types of expenses when the page loads
+    this.loadItemExesList = function () {
+        var keys = Object.keys(exesItem);
+        var values = Object.values(exesItem);
+        var options = '';
+        for (var i = 0; i < keys.length; i++) {
+            /* opt.value = keys[i];
+            opt.innerHTML = values[i]; */
+            options += '<option value="' + keys[i] + '">' + values[i] + '</option>';
+        }
+        listExes.innerHTML = options;
+    };
 
-    }
+    //Add itens in the datalist of type expenses
+    this.appendItemDataList = function () {
+        var append = true;
+        var opt = document.createElement('option');
+        for (i = 0; i < listExes.options.length; i++) {
+            if (this.tipoDespesa == listExes.options[i].value) {
+                append = false;
+            };
+        };
+        if (append == true) {
+            opt.value = this.tipoDespesa;
+            listExes.appendChild(opt);
+        };
+    };
 
+    //generates Json with the rows of the table 
     this.gerarJson = function () {
         var tablehead = contentTbody.parentElement.querySelector('tr');
         var lastrows = contentTbody.lastElementChild.querySelectorAll('th, td');
@@ -75,10 +111,17 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
             contentRow[tablehead.cells.item(i).textContent.toLocaleLowerCase()] = lastrows.item(i).textContent;
         };
         jsonExes['exes'].push(contentRow);
-        // console.log(jsonExes);
-    }
+    };
+
+    // save the generated json from the expense table
+    function saveExes() { console.log('Saved Exes;') };
 };
 
+/*
+    Listen to the event click the add button and add rows to the expense table, 
+    update the balance, clear the form entries, 
+    generate the Json and add expense types
+*/
 addButton.addEventListener('click', function () {
     if (!iptdespesa.value == "" && !iptestabelecimento.value == "" && !iptdata.value == "" && !iptvalor.value == "" && !iptSaldo.value == "") {
         var saldo = new Saldo(parseFloat(iptSaldo.value));
@@ -87,12 +130,14 @@ addButton.addEventListener('click', function () {
         saldo.updateSaldo();
         clearInputs();
         newExes.gerarJson();
-        document.querySelector('.alert').hidden = true
+        newExes.appendItemDataList();
+        document.querySelector('.alert').hidden = true;
     } else {
-        document.querySelector('.alert').hidden = false
+        document.querySelector('.alert').hidden = false;
     };
 });
 
+//Delete expenses
 function deleteDespesa(x) {
     var row = x.parentNode.parentNode.rowIndex;
     var rowSaldo = x.parentNode.parentNode.cells.item(4).textContent;
@@ -114,13 +159,37 @@ function deleteDespesa(x) {
     if (document.getElementById('show-json').hidden = false) { showJson(); }
 };
 
+// Show Json when click button 'Exibir Json'
 function showJson() {
     strJsonExes = JSON.stringify(jsonExes);
     document.querySelector('pre').innerHTML = strJsonExes;
     document.getElementById('show-json').hidden = false;
 }
 
+var labelChart = function () {
+    var labelsChartExes = [];
+    jsonExes.exes.forEach(function (x) { labelsChartExes.push(x.despesa); })
+    return labelsChartExes;
+}
 
+var dataChart = function () {
+    var dataChartExes = [];
+    var sumExes = {};
+    /* var typesExes = labelChart(); */
+
+    labelChart().forEach(function (x) {
+        sumExes[x] = 0
+    });
+
+    jsonExes.exes.forEach(function (x) {
+        if(sumExes.hasOwnProperty(Object.values(x)[1])){
+            sumExes[Object.values(x)[1]] += parseFloat(x.valor);
+            //console.log(Object.values(x)[1] +' = '+sumExes[Object.values(x)[1]]);
+        }
+    });
+    return sumExes;
+}
+//Generates statistics graph
 var ctx = document.getElementById('myChart').getContext('2d');
 var chart = new Chart(ctx, {
     // The type of chart we want to create
@@ -128,7 +197,7 @@ var chart = new Chart(ctx, {
 
     // The data for our dataset
     data: {
-        labels: ['Aluguel', 'Condominio', 'Padaria', 'Supermercado', 'Card. Credito', 'Card. Debito', 'Corridas'],
+        labels: labelChart(),
         datasets: [{
             label: 'My First dataset',
             backgroundColor: [
@@ -148,3 +217,10 @@ var chart = new Chart(ctx, {
     options: {}
 });
 
+// load types expenses when page ready
+document.onreadystatechange = function () {
+    if (document.readyState == "complete") {
+        var newExes = new Despesa();
+        newExes.loadItemExesList();
+    };
+};
