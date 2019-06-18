@@ -19,7 +19,10 @@ var exesItem = { "Debito": "Cartão de Debito", "Credito": "Cartão de Credito",
 //Datalist exes
 var listExes = document.getElementById('optDespesas');
 
+// Get canva
+var ctx = document.getElementById('myChart');
 
+/* =================================================================================================================== */
 
 //Objeto Saldo
 function Saldo(value) {
@@ -163,12 +166,15 @@ function deleteDespesa(x) {
 function showJson() {
     strJsonExes = JSON.stringify(jsonExes);
     document.querySelector('pre').innerHTML = strJsonExes;
-    document.getElementById('show-json').hidden = false;
+    btn = document.getElementById('show-json')
+    showOrHideElement(btn);
 }
 
 var labelChart = function () {
     var labelsChartExes = [];
-    jsonExes.exes.forEach(function (x) { labelsChartExes.push(x.despesa); })
+    jsonExes.exes.forEach(function (x) {
+        labelsChartExes.push(x.despesa);
+    });
     return labelsChartExes;
 }
 
@@ -182,16 +188,15 @@ var dataChart = function () {
     });
 
     jsonExes.exes.forEach(function (x) {
-        if(sumExes.hasOwnProperty(Object.values(x)[1])){
+        if (sumExes.hasOwnProperty(Object.values(x)[1])) {
             sumExes[Object.values(x)[1]] += parseFloat(x.valor);
             //console.log(Object.values(x)[1] +' = '+sumExes[Object.values(x)[1]]);
         }
     });
     return sumExes;
 }
-//Generates statistics graph
-var ctx = document.getElementById('myChart').getContext('2d');
-var chart = new Chart(ctx, {
+
+var config = {
     // The type of chart we want to create
     type: 'pie',
 
@@ -215,12 +220,38 @@ var chart = new Chart(ctx, {
 
     // Configuration options go here
     options: {}
-});
+};
+
+//Generates statistics graph
+function showStatistics() {
+    ctx.getContext('2d');
+    var chart = new Chart(ctx, config);
+    showOrHideElement(ctx);
+};
 
 // load types expenses when page ready
 document.onreadystatechange = function () {
     if (document.readyState == "complete") {
         var newExes = new Despesa();
         newExes.loadItemExesList();
+        hiddenElement(ctx);
     };
 };
+
+function showElement(element) {
+    element.hidden = false;
+};
+
+function hiddenElement(element) {
+    element.hidden = true;
+};
+
+// show or hide elements
+function showOrHideElement(element) {
+    if (element.hidden == true) {
+        showElement(element);
+    } else {
+        hiddenElement(element);
+    }
+}
+
