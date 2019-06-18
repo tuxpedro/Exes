@@ -171,12 +171,31 @@ function showJson() {
 }
 
 var labelChart = function () {
+
     var labelsChartExes = [];
+    var k = 0;
+    var add = true;
+
     jsonExes.exes.forEach(function (x) {
-        labelsChartExes.push(x.despesa);
+
+        labelsChartExes.forEach(function(){
+        for(var i = 0; i <= labelsChartExes.length; i++){
+
+            if(labelsChartExes[k] == Object.values(x)[1]){
+                console.log(labelsChartExes[k]);
+                add = false;
+            };
+            
+            if(add == true){
+                labelsChartExes.push(x.despesa);
+            };
+        };
+
+        k += 1;
+        
+        });
     });
-    return labelsChartExes;
-}
+};
 
 var dataChart = function () {
     var dataChartExes = [];
