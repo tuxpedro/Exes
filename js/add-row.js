@@ -36,7 +36,7 @@ function Saldo(value) {
 
     this.debito = function (value) {
         this.saldo -= value
-        return this.saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        return this.saldo;
     };
 
     this.credito = function (value) {
@@ -77,7 +77,7 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
         list_td[1].textContent = this.tipoDespesa;
         list_td[2].textContent = this.estabCompra;
         list_td[3].textContent = convertDate(this.dataDespesa);
-        list_td[4].textContent = Number(this.valorDespesa).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        list_td[4].textContent = Number(this.valorDespesa);
         list_td[5].textContent = valorSaldo.debito(this.valorDespesa);
 
         var newRow = document.importNode(template.content, true);
@@ -127,25 +127,6 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
     function saveExes() { console.log('Saved Exes;') };
 };
 
-/*
-    Listen to the event click the add button and add rows to the expense table, 
-    update the balance, clear the form entries, 
-    generate the Json and add expense types
-*/
-addButton.addEventListener('click', function () {
-    if (!iptdespesa.value == "" && !iptestabelecimento.value == "" && !iptdata.value == "" && !iptvalor.value == "" && !iptSaldo.value == "") {
-        var saldo = new Saldo(parseFloat(iptSaldo.value));
-        var newExes = new Despesa(iptdespesa.value, iptestabelecimento.value, iptdata.value, iptvalor.value, saldo);
-        newExes.addRowByTemplate();
-        saldo.updateSaldo();
-        clearInputs();
-        newExes.gerarJson();
-        newExes.appendItemDataList();
-        document.querySelector('.alert').hidden = true;
-    } else {
-        document.querySelector('.alert').hidden = false;
-    };
-});
 
 //Delete expenses
 function deleteDespesa(x) {
@@ -188,20 +169,18 @@ var labelChart = function () {
 
 var dataChart = function () {
     var sumExes = {};
-
     labelChart().forEach(function (x) {
-        sumExes[x] = 0
+        sumExes[x] = 0;
     });
-
-    jsonExes.exes.forEach(function (x) {
-        if (sumExes.hasOwnProperty(Object.values(x)[1])) {
-            sumExes[Object.values(x)[1]] += parseFloat(x.valor);
-            console.log(Object.values(x)[1] +' = '+sumExes[Object.values(x)[1]]);
-        }
-    });
-
-    return Object.values(sumExes);
-}
+    for (var i = 0; i < jsonExes.exes.length; i++) {
+        var v = jsonExes.exes[i].despesa;
+        if (sumExes.hasOwnProperty(jsonExes.exes[i].despesa)) {
+            sumExes[jsonExes.exes[i].despesa] += Number(jsonExes.exes[i].valor);;
+        };
+    };
+    dataChartExes = Object.values(sumExes);
+    return dataChartExes;
+};
 
 var config = {
     // The type of chart we want to create
@@ -221,7 +200,7 @@ var config = {
                 'rgba(255, 159, 64, 0.2)'
             ],
             borderColor: 'rgb(0, 0, 0, 0)',
-            data: [90, 10, 5, 2, 20, 30, 45]
+            data: dataChartExes,
         }]
     },
 
@@ -234,16 +213,6 @@ function showStatistics() {
     ctx.getContext('2d');
     var chart = new Chart(ctx, config);
     showOrHideElement(ctx);
-};
-
-// load types expenses when page ready
-document.onreadystatechange = function () {
-    if (document.readyState == "complete") {
-        var newExes = new Despesa();
-        newExes.loadItemExesList();
-        hiddenElement(ctx);
-        iptSaldo.value = Number(200);
-    };
 };
 
 function showElement(element) {
@@ -261,5 +230,36 @@ function showOrHideElement(element) {
     } else {
         hiddenElement(element);
     }
-}
+};
 
+/*
+    Listen to the event click the add button and add rows to the expense table, 
+    update the balance, clear the form entries, 
+    generate the Json and add expense types
+*/
+addButton.addEventListener('click', function () {
+    if (!iptdespesa.value == "" && !iptestabelecimento.value == "" && !iptdata.value == "" && !iptvalor.value == "" && !iptSaldo.value == "") {
+        var saldo = new Saldo(parseFloat(iptSaldo.value));
+        var newExes = new Despesa(iptdespesa.value, iptestabelecimento.value, iptdata.value, iptvalor.value, saldo);
+        newExes.addRowByTemplate();
+        saldo.updateSaldo();
+        clearInputs();
+        newExes.gerarJson();
+        newExes.appendItemDataList();
+        document.querySelector('.alert').hidden = true;
+        labelChart();
+        dataChart();
+    } else {
+        document.querySelector('.alert').hidden = false;
+    };
+});
+
+// load types expenses when page ready
+document.onreadystatechange = function () {
+    if (document.readyState == "complete") {
+        var newExes = new Despesa();
+        newExes.loadItemExesList();
+        hiddenElement(ctx);
+        iptSaldo.value = Number(200);
+    };
+};
