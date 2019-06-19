@@ -22,6 +22,12 @@ var listExes = document.getElementById('optDespesas');
 // Get canva
 var ctx = document.getElementById('myChart');
 
+//Labels of the chart
+var labelsChartExes = [];
+
+//Datas of the chart
+var dataChartExes = [];
+
 /* =================================================================================================================== */
 
 //Objeto Saldo
@@ -29,7 +35,8 @@ function Saldo(value) {
     this.saldo = value
 
     this.debito = function (value) {
-        return this.saldo -= value
+        this.saldo -= value
+        return this.saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
 
     this.credito = function (value) {
@@ -70,7 +77,7 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
         list_td[1].textContent = this.tipoDespesa;
         list_td[2].textContent = this.estabCompra;
         list_td[3].textContent = convertDate(this.dataDespesa);
-        list_td[4].textContent = this.valorDespesa;
+        list_td[4].textContent = Number(this.valorDespesa).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         list_td[5].textContent = valorSaldo.debito(this.valorDespesa);
 
         var newRow = document.importNode(template.content, true);
@@ -171,36 +178,16 @@ function showJson() {
 }
 
 var labelChart = function () {
-
-    var labelsChartExes = [];
-    var k = 0;
-    var add = true;
-
-    jsonExes.exes.forEach(function (x) {
-
-        labelsChartExes.forEach(function(){
-        for(var i = 0; i <= labelsChartExes.length; i++){
-
-            if(labelsChartExes[k] == Object.values(x)[1]){
-                console.log(labelsChartExes[k]);
-                add = false;
-            };
-            
-            if(add == true){
-                labelsChartExes.push(x.despesa);
-            };
+    for (var k = 0; k < jsonExes.exes.length; k++) {
+        if (!labelsChartExes.includes(jsonExes.exes[k].despesa)) {
+            labelsChartExes.push(jsonExes.exes[k].despesa);
         };
-
-        k += 1;
-        
-        });
-    });
+    }
+    return labelsChartExes;
 };
 
 var dataChart = function () {
-    var dataChartExes = [];
     var sumExes = {};
-    /* var typesExes = labelChart(); */
 
     labelChart().forEach(function (x) {
         sumExes[x] = 0
@@ -209,10 +196,11 @@ var dataChart = function () {
     jsonExes.exes.forEach(function (x) {
         if (sumExes.hasOwnProperty(Object.values(x)[1])) {
             sumExes[Object.values(x)[1]] += parseFloat(x.valor);
-            //console.log(Object.values(x)[1] +' = '+sumExes[Object.values(x)[1]]);
+            console.log(Object.values(x)[1] +' = '+sumExes[Object.values(x)[1]]);
         }
     });
-    return sumExes;
+
+    return Object.values(sumExes);
 }
 
 var config = {
@@ -221,7 +209,7 @@ var config = {
 
     // The data for our dataset
     data: {
-        labels: labelChart(),
+        labels: labelsChartExes,
         datasets: [{
             label: 'My First dataset',
             backgroundColor: [
@@ -254,6 +242,7 @@ document.onreadystatechange = function () {
         var newExes = new Despesa();
         newExes.loadItemExesList();
         hiddenElement(ctx);
+        iptSaldo.value = Number(200);
     };
 };
 

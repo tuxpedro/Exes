@@ -17,7 +17,13 @@ input#saldo{
     background: none;
     width: 20%;
     background: #ffffff;
-    font-size: 24px;
+    font-size: 24pt;
+}
+
+#real{
+font-size: 25pt;
+    padding: 14px 0px 0px 13px;
+    margin: 0px 0px 0px 10px;
 }
 
 pre {
