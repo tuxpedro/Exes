@@ -5,6 +5,9 @@ var iptdata = document.getElementById('data');
 var iptvalor = document.getElementById('valor');
 var addButton = document.getElementById('addButton');
 var iptSaldo = document.getElementById('saldo');
+var saveButton = document.getElementById('btnSave');
+var statisticsBtn = document.getElementById('showStatistics');
+var showJsonButton = document.getElementById('showJson');
 
 // cria um índice
 var item = 0;
@@ -28,7 +31,13 @@ var labelsChartExes = [];
 //Datas of the chart
 var dataChartExes = [];
 
+// settings chart
 var config;
+
+// div alerts
+var divAlert = document.querySelector('.alert');
+
+var saveExes = false;
 
 /* =================================================================================================================== */
 
@@ -124,9 +133,6 @@ function Despesa(despesa, estabelecimento, data, valor, valorSaldo) {
         };
         jsonExes['exes'].push(contentRow);
     };
-
-    // save the generated json from the expense table
-    function saveExes() { console.log('Saved Exes;') };
 };
 
 
@@ -154,7 +160,7 @@ function deleteDespesa(x) {
 
 // Show Json when click button 'Exibir Json'
 function showJson() {
-    strJsonExes = JSON.stringify(jsonExes);
+    var strJsonExes = JSON.stringify(jsonExes);
     document.querySelector('pre').innerHTML = strJsonExes;
     btn = document.getElementById('show-json')
     showOrHideElement(btn);
@@ -202,16 +208,6 @@ function showOrHideElement(element) {
     }
 };
 
-// load types expenses when page ready
-document.onreadystatechange = function () {
-    if (document.readyState == "complete") {
-        var newExes = new Despesa();
-        newExes.loadItemExesList();
-        hiddenElement(ctx);
-        iptSaldo.value = Number(200);
-    };
-};
-
 //Generates statistics graph
 function showStatistics() {
     ctx.getContext('2d');
@@ -254,7 +250,7 @@ addButton.addEventListener('click', function () {
         clearInputs();
         newExes.gerarJson();
         newExes.appendItemDataList();
-        document.querySelector('.alert').hidden = true;
+        hiddenElement(divAlert);
         labelChart();
         dataChart();
         if(ctx.hidden == false){
@@ -262,6 +258,43 @@ addButton.addEventListener('click', function () {
             showElement(ctx);
         }
     } else {
-        document.querySelector('.alert').hidden = false;
+        if(divAlert.hidden == false){
+            divAlert.className = "col alert alert-danger"
+            divAlert.textContent = "***ATENÇÃO*** - Algum campo está vazio!";
+        }else{
+            showElement(divAlert);
+            divAlert.textContent = "***ATENÇÃO*** - Algum campo está vazio!";
+        }
     };
 });
+
+/* localStorage - Save jsonExes */
+function saveJsonExes(){
+    var strJsonExes = JSON.stringify(jsonExes);
+    localStorage.setItem('docExes', strJsonExes);
+    saveButton.addEventListener('click',  function(){
+        divAlert.className = "col alert alert-success";
+        divAlert.textContent = 'A tabela de despesas foi salva localmente';
+        showElement(divAlert);
+    });
+    saveExes = true;
+};
+
+function recoverJsonExes(){
+    var jsonRdExes = localStorage.getItem('docExes');
+    return jsonRdExes;
+}
+
+
+// load types expenses when page ready
+document.onreadystatechange = function () {
+    if (document.readyState == "complete") {
+        var newExes = new Despesa();
+        newExes.loadItemExesList();
+        hiddenElement(ctx);
+        iptSaldo.value = Number(200);
+        saveButton.onclick = saveJsonExes;
+        statisticsBtn.onclick = showStatistics;
+        showJsonButton.onclick = showJson;
+    };
+};

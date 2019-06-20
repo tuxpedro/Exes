@@ -35,14 +35,12 @@
         <hr>
 
         <form>
-            <div class=" col alert alert-danger" role="alert" hidden>
-                ***ATENÇÃO*** - Algum campo está vazio!
-            </div>
+            <div class="col alert alert-danger" role="alert" hidden></div>
             <div class="form-row">
                 <div class="col">
                     <input list="optDespesas" id="despesa" class="custom-select" placeholder="Tipo de Despesa">
                     <datalist id="optDespesas">
-                        
+
                     </datalist>
                 </div>
 
@@ -78,9 +76,9 @@
             </tbody>
         </table>
         <div class="">
-            <button id="salvar" onclick="saveExes();" class="btn btn-success">Salvar</button>
-            <button id="showStatistics" onclick="showStatistics();" class="btn btn-primary">Gerar Estatisticas </button>
-            <button id="showJson" onclick="showJson();" class="btn btn-primary">Exibir Json</button>
+            <button id="btnSave" class="btn btn-success">Salvar</button>
+            <button id="showStatistics" class="btn btn-primary">Gerar Estatisticas </button>
+            <button id="showJson" class="btn btn-primary">Exibir Json</button>
         </div>
         <br />
         <div id="show-json" hidden="true">
