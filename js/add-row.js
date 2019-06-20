@@ -28,6 +28,8 @@ var labelsChartExes = [];
 //Datas of the chart
 var dataChartExes = [];
 
+var config;
+
 /* =================================================================================================================== */
 
 //Objeto Saldo
@@ -182,38 +184,6 @@ var dataChart = function () {
     return dataChartExes;
 };
 
-var config = {
-    // The type of chart we want to create
-    type: 'pie',
-
-    // The data for our dataset
-    data: {
-        labels: labelsChartExes,
-        datasets: [{
-            label: 'My First dataset',
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: 'rgb(0, 0, 0, 0)',
-            data: dataChartExes,
-        }]
-    },
-
-    // Configuration options go here
-    options: {}
-};
-
-//Generates statistics graph
-function showStatistics() {
-    ctx.getContext('2d');
-    var chart = new Chart(ctx, config);
-    showOrHideElement(ctx);
-};
 
 function showElement(element) {
     element.hidden = false;
@@ -232,10 +202,48 @@ function showOrHideElement(element) {
     }
 };
 
+// load types expenses when page ready
+document.onreadystatechange = function () {
+    if (document.readyState == "complete") {
+        var newExes = new Despesa();
+        newExes.loadItemExesList();
+        hiddenElement(ctx);
+        iptSaldo.value = Number(200);
+    };
+};
+
+//Generates statistics graph
+function showStatistics() {
+    ctx.getContext('2d');
+    config = {
+        // The type of chart we want to create
+        type: 'pie',
+        // The data for our dataset
+        data: {
+            labels: labelsChartExes,
+            datasets: [{
+                label: 'My First dataset',
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: 'rgb(0, 0, 0, 0)',
+                data: dataChartExes,
+            }]
+        }
+    };
+    var chart = new Chart(ctx, config);
+    showOrHideElement(ctx);
+};
+
 /*
-    Listen to the event click the add button and add rows to the expense table, 
-    update the balance, clear the form entries, 
-    generate the Json and add expense types
+Listen to the event click the add button and add rows to the expense table, 
+update the balance, clear the form entries, 
+generate the Json and add expense types
 */
 addButton.addEventListener('click', function () {
     if (!iptdespesa.value == "" && !iptestabelecimento.value == "" && !iptdata.value == "" && !iptvalor.value == "" && !iptSaldo.value == "") {
@@ -249,17 +257,11 @@ addButton.addEventListener('click', function () {
         document.querySelector('.alert').hidden = true;
         labelChart();
         dataChart();
+        if(ctx.hidden == false){
+            showStatistics();
+            showElement(ctx);
+        }
     } else {
         document.querySelector('.alert').hidden = false;
     };
 });
-
-// load types expenses when page ready
-document.onreadystatechange = function () {
-    if (document.readyState == "complete") {
-        var newExes = new Despesa();
-        newExes.loadItemExesList();
-        hiddenElement(ctx);
-        iptSaldo.value = Number(200);
-    };
-};
