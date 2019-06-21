@@ -8,6 +8,8 @@ var iptSaldo = document.getElementById('saldo');
 var saveButton = document.getElementById('btnSave');
 var statisticsBtn = document.getElementById('showStatistics');
 var showJsonButton = document.getElementById('showJson');
+var modal = document.getElementById('modalRecuperaDados');
+var spanBadge = document.getElementById('cont');
 
 // cria um índice
 var item = 0;
@@ -37,7 +39,14 @@ var config;
 // div alerts
 var divAlert = document.querySelector('.alert');
 
+// alert unsaved expenses
 var saveExes = false;
+
+// count unsaved expenses
+var numUnsavedExes = 0;
+
+// get btn yes modal recover data
+var btnYesModal;
 
 /* =================================================================================================================== */
 
@@ -55,15 +64,19 @@ function Saldo(value) {
     };
 
     this.updateSaldo = function () {
-        return document.getElementById('saldo').value = this.saldo
+        return iptSaldo.value = this.saldo;
     };
 };
 
 // Convert a date
 function convertDate(data) {
-    var arrDate = data.split('-');
-    var stringDate = arrDate[2] + '/' + arrDate[1] + '/' + arrDate[0];
-    return stringDate;
+    if (data.includes('-')) {
+        var arrDate = data.split('-');
+        var stringDate = arrDate[2] + '/' + arrDate[1] + '/' + arrDate[0];
+        return stringDate;
+    } else {
+        return data;
+    }
 };
 
 //Clear inputs forms
@@ -164,7 +177,7 @@ function showJson() {
     document.querySelector('pre').innerHTML = strJsonExes;
     btn = document.getElementById('show-json')
     showOrHideElement(btn);
-}
+};
 
 var labelChart = function () {
     for (var k = 0; k < jsonExes.exes.length; k++) {
@@ -253,15 +266,19 @@ addButton.addEventListener('click', function () {
         hiddenElement(divAlert);
         labelChart();
         dataChart();
-        if(ctx.hidden == false){
+        saveExes = true;
+        if (saveExes == true) {
+            spanBadge.innerHTML = numUnsavedExes += 1;
+        };
+        if (ctx.hidden == false) {
             showStatistics();
             showElement(ctx);
-        }
+        };
     } else {
-        if(divAlert.hidden == false){
+        if (divAlert.hidden == false) {
             divAlert.className = "col alert alert-danger"
             divAlert.textContent = "***ATENÇÃO*** - Algum campo está vazio!";
-        }else{
+        } else {
             showElement(divAlert);
             divAlert.textContent = "***ATENÇÃO*** - Algum campo está vazio!";
         }
@@ -269,20 +286,34 @@ addButton.addEventListener('click', function () {
 });
 
 /* localStorage - Save jsonExes */
-function saveJsonExes(){
+function saveJsonExes() {
     var strJsonExes = JSON.stringify(jsonExes);
     localStorage.setItem('docExes', strJsonExes);
-    saveButton.addEventListener('click',  function(){
+    saveButton.addEventListener('click', function () {
         divAlert.className = "col alert alert-success";
         divAlert.textContent = 'A tabela de despesas foi salva localmente';
         showElement(divAlert);
+        saveExes = false;
+        spanBadge.innerHTML = '';
     });
-    saveExes = true;
 };
 
-function recoverJsonExes(){
-    var jsonRdExes = localStorage.getItem('docExes');
-    return jsonRdExes;
+function recoverJsonExes() {
+    try {
+        jsonExes = JSON.parse(localStorage.getItem('docExes'));
+        var len = Number(jsonExes.exes.length);
+        var sum = Number(0);
+        jsonExes.exes.forEach(function (x) { sum += Number(x.valor); });
+        var saldo = new Saldo(Number(jsonExes.exes[len - 1].saldo) + sum);
+        jsonExes.exes.forEach(function (i) {
+            new Despesa(i.despesa, i.estabelecimento, i.data, i.valor, saldo).addRowByTemplate();
+        });
+        iptSaldo.valor = saldo.updateSaldo();
+    } catch (error) {
+        console.log('Nunhuma despesa encontra!' + ' '+error);
+        iptSaldo.focus();
+    }
+
 }
 
 
@@ -292,9 +323,17 @@ document.onreadystatechange = function () {
         var newExes = new Despesa();
         newExes.loadItemExesList();
         hiddenElement(ctx);
-        iptSaldo.value = Number(200);
+        //iptSaldo.value = Number(200);
         saveButton.onclick = saveJsonExes;
         statisticsBtn.onclick = showStatistics;
         showJsonButton.onclick = showJson;
+        $('#modalRecuperaDados').modal('show');
+        btnYesModal = document.getElementById('btnModalYes');
+        btnYesModal.addEventListener('click', function () {
+            recoverJsonExes();
+            labelChart();
+            dataChart();
+            $('#modalRecuperaDados').modal('hide');
+        });
     };
 };

@@ -15,9 +15,14 @@ input#saldo{
     border: 0px solid;
     box-shadow: none;
     background: none;
-    width: 20%;
+    width: 22%;
     background: #ffffff;
     font-size: 24pt;
+    padding-bottom: 0px;
+}
+
+input#saldo::placeholder{
+  color: red;
 }
 
 #real{
