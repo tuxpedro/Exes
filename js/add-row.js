@@ -322,8 +322,7 @@ document.onreadystatechange = function () {
     if (document.readyState == "complete") {
         var newExes = new Despesa();
         newExes.loadItemExesList();
-        hiddenElement(ctx);
-        //iptSaldo.value = Number(200);
+        hiddenElement(ctx); 
         saveButton.onclick = saveJsonExes;
         statisticsBtn.onclick = showStatistics;
         showJsonButton.onclick = showJson;
